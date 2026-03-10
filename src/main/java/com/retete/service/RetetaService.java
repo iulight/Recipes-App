@@ -34,6 +34,7 @@ public class RetetaService {
         carbonara.adaugaIngredient(new Ingredient("Parmezan ras", 100, "g"));
         carbonara.adaugaIngredient(new Ingredient("Piper negru", 1, "lingurita"));
         carbonara.adaugaIngredient(new Ingredient("Sare", 1, "lingurita"));
+        carbonara.setImagine("https://images.unsplash.com/photo-1612874742237-6526221588e3?w=600&q=80");
 
         // Reteta 2 - Ciorba de pui
         Reteta ciorba = new Reteta(uuid(), "Ciorba de Pui", "Supe & Ciorbe",
@@ -47,6 +48,7 @@ public class RetetaService {
         ciorba.adaugaIngredient(new Ingredient("Tarhon uscat", 2, "linguri"));
         ciorba.adaugaIngredient(new Ingredient("Lamaie", 1, "buc"));
         ciorba.adaugaIngredient(new Ingredient("Smantana", 200, "ml"));
+        ciorba.setImagine("https://images.unsplash.com/photo-1547592180-85f173990554?w=600&q=80");
 
         // Reteta 3 - Tort de ciocolata
         Reteta tort = new Reteta(uuid(), "Tort de Ciocolata", "Deserturi",
@@ -61,6 +63,7 @@ public class RetetaService {
         tort.adaugaIngredient(new Ingredient("Ulei", 120, "ml"));
         tort.adaugaIngredient(new Ingredient("Ciocolata neagra", 200, "g"));
         tort.adaugaIngredient(new Ingredient("Smantana lichida", 150, "ml"));
+        tort.setImagine("https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600&q=80");
 
         // Reteta 4 - Salata greceasca
         Reteta salata = new Reteta(uuid(), "Salata Greceasca", "Salate",
@@ -74,6 +77,7 @@ public class RetetaService {
         salata.adaugaIngredient(new Ingredient("Ceapa rosie", 1, "buc"));
         salata.adaugaIngredient(new Ingredient("Ulei de masline", 3, "linguri"));
         salata.adaugaIngredient(new Ingredient("Oregano", 1, "lingurita"));
+        salata.setImagine("https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=600&q=80");
 
         // Reteta 5 - Omleta cu legume
         Reteta omleta = new Reteta(uuid(), "Omleta cu Legume", "Mic Dejun",
@@ -85,6 +89,7 @@ public class RetetaService {
         omleta.adaugaIngredient(new Ingredient("Rosii cherry", 8, "buc"));
         omleta.adaugaIngredient(new Ingredient("Cascaval ras", 50, "g"));
         omleta.adaugaIngredient(new Ingredient("Unt", 20, "g"));
+        omleta.setImagine("https://images.unsplash.com/photo-1510693206972-df098062cb71?w=600&q=80");
 
         retete.addAll(carbonara, ciorba, tort, salata, omleta);
     }
