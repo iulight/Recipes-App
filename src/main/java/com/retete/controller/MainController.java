@@ -6,11 +6,14 @@ import com.retete.model.Reteta;
 import com.retete.service.RetetaService;
 import javafx.animation.*;
 import javafx.collections.FXCollections;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
@@ -53,6 +56,10 @@ public class MainController implements Initializable {
     @FXML private TextField campCantitateItem;
     @FXML private TextField campUnitateItem;
 
+    @FXML private StackPane imageContainer;
+    @FXML private Label imagePlaceholder;
+    @FXML private StackPane detailContainer;
+
     private RetetaService service;
     private Reteta retetaSelectata;
 
@@ -86,12 +93,12 @@ public class MainController implements Initializable {
                 HBox root = new HBox(0);
                 root.setAlignment(Pos.CENTER_LEFT);
 
-                // Indicator lateral rosu
+                // Indicator lateral verde
                 Region indicator = new Region();
                 indicator.setPrefWidth(4);
                 indicator.setMinWidth(4);
                 indicator.setStyle(selected
-                        ? "-fx-background-color: #e74c3c;"
+                        ? "-fx-background-color: #3A6B1A;"
                         : "-fx-background-color: transparent;");
 
                 VBox content = new VBox(3);
@@ -99,14 +106,14 @@ public class MainController implements Initializable {
                 HBox.setHgrow(content, Priority.ALWAYS);
 
                 Label numeLabel = new Label(item.getNume());
-                numeLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: " + (selected ? "#c0392b;" : "#1a1a1a;"));
+                numeLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: " + (selected ? "#2D5016;" : "#1A1A1A;"));
 
                 HBox meta = new HBox(8);
                 meta.setAlignment(Pos.CENTER_LEFT);
                 Label catLabel = new Label("📂 " + item.getCategorie());
-                catLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #aaa;");
+                catLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #B0A89E;");
                 Label timpLabel = new Label("⏱ " + item.getTimpPreparare());
-                timpLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #aaa;");
+                timpLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #B0A89E;");
                 meta.getChildren().addAll(catLabel, timpLabel);
 
                 content.getChildren().addAll(numeLabel, meta);
@@ -199,6 +206,9 @@ public class MainController implements Initializable {
         labelDescriere.setText(r.getDescriere());
         areaInstructiuni.setText(r.getInstructiuni());
 
+        // Load recipe image asynchronously
+        incarcaImagine(r.getImagine());
+
         panelIngrediente.getChildren().clear();
         for (Ingredient ing : r.getIngrediente()) {
             HBox chip = new HBox(6);
@@ -206,13 +216,55 @@ public class MainController implements Initializable {
             chip.getStyleClass().add("ingredient-chip");
 
             Label dot = new Label("●");
-            dot.setStyle("-fx-text-fill: #e74c3c; -fx-font-size: 8px;");
+            dot.setStyle("-fx-text-fill: #3A6B1A; -fx-font-size: 8px;");
             Label text = new Label(ing.getAfisare());
             text.getStyleClass().add("ingredient-text");
 
             chip.getChildren().addAll(dot, text);
             panelIngrediente.getChildren().add(chip);
         }
+    }
+
+    private void incarcaImagine(String url) {
+        // Reset to placeholder
+        imageContainer.getChildren().removeIf(n -> n instanceof ImageView);
+        if (imagePlaceholder != null) {
+            imagePlaceholder.setVisible(true);
+        }
+
+        if (url == null || url.isEmpty()) return;
+
+        Task<Image> task = new Task<>() {
+            @Override
+            protected Image call() {
+                return new Image(url, 600, 220, true, true, false);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            Image img = task.getValue();
+            if (!img.isError()) {
+                ImageView iv = new ImageView(img);
+                iv.setFitWidth(imageContainer.getWidth() > 0 ? imageContainer.getWidth() : 600);
+                iv.setFitHeight(220);
+                iv.setPreserveRatio(false);
+                iv.setSmooth(true);
+                // Bind to container width for responsiveness
+                iv.fitWidthProperty().bind(imageContainer.widthProperty());
+                imageContainer.getChildren().add(0, iv);
+                if (imagePlaceholder != null) {
+                    imagePlaceholder.setVisible(false);
+                }
+                // Fade in image
+                FadeTransition fadeIn = new FadeTransition(Duration.millis(400), iv);
+                fadeIn.setFromValue(0); fadeIn.setToValue(1);
+                fadeIn.play();
+            }
+        });
+
+        Thread t = new Thread(task);
+        t.setDaemon(true);
+        t.start();
     }
 
     private void filtreaza() {
@@ -274,11 +326,11 @@ public class MainController implements Initializable {
         TextArea taDescriere = new TextArea();
         taDescriere.setPromptText("Descriere scurtă...");
         taDescriere.setPrefHeight(70);
-        taDescriere.setStyle("-fx-background-color: #f8f4f0; -fx-border-color: transparent; -fx-background-radius: 10; -fx-font-size: 13px;");
+        taDescriere.setStyle("-fx-background-color: #F5F1EC; -fx-border-color: transparent; -fx-background-radius: 12; -fx-font-size: 13px;");
         TextArea taInstructiuni = new TextArea();
         taInstructiuni.setPromptText("Pașii de preparare...");
         taInstructiuni.setPrefHeight(110);
-        taInstructiuni.setStyle("-fx-background-color: #f8f4f0; -fx-border-color: transparent; -fx-background-radius: 10; -fx-font-size: 13px;");
+        taInstructiuni.setStyle("-fx-background-color: #F5F1EC; -fx-border-color: transparent; -fx-background-radius: 12; -fx-font-size: 13px;");
 
         grid.add(boldLabel("Nume rețetă *"), 0, 0); grid.add(tfNume, 1, 0);
         grid.add(boldLabel("Categorie"), 0, 1); grid.add(tfCategorie, 1, 1);
@@ -364,21 +416,21 @@ public class MainController implements Initializable {
                 HBox.setHgrow(info, Priority.ALWAYS);
 
                 String textStyle = item.isCumparat()
-                        ? "-fx-strikethrough: true; -fx-text-fill: #ccc; -fx-font-size: 13px;"
-                        : "-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1a1a1a;";
+                        ? "-fx-strikethrough: true; -fx-text-fill: #C0B8B0; -fx-font-size: 13px;"
+                        : "-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #1A1A1A;";
 
                 Label textLabel = new Label(item.getAfisare());
                 textLabel.setStyle(textStyle);
 
                 Label sursa = new Label("din: " + item.getDinReteta());
-                sursa.setStyle("-fx-font-size: 11px; -fx-text-fill: " + (item.isCumparat() ? "#ddd;" : "#e74c3c;"));
+                sursa.setStyle("-fx-font-size: 11px; -fx-text-fill: " + (item.isCumparat() ? "#D8D0C8;" : "#3A6B1A;"));
 
                 info.getChildren().addAll(textLabel, sursa);
 
                 // Checkmark icon dacă e cumparat
                 if (item.isCumparat()) {
                     Label check = new Label("✓");
-                    check.setStyle("-fx-text-fill: #27ae60; -fx-font-size: 16px; -fx-font-weight: bold;");
+                    check.setStyle("-fx-text-fill: #3A6B1A; -fx-font-size: 16px; -fx-font-weight: bold;");
                     row.getChildren().addAll(cb, info, check);
                 } else {
                     row.getChildren().addAll(cb, info);
@@ -482,27 +534,42 @@ public class MainController implements Initializable {
         shake.setFromX(0); shake.setByX(8); shake.setCycleCount(4);
         shake.setAutoReverse(true);
         shake.setOnFinished(e -> field.setTranslateX(0));
-        field.setStyle(field.getStyle() + " -fx-border-color: #e74c3c; -fx-border-width: 1.5;");
+        field.setStyle(field.getStyle() + " -fx-border-color: #C8553D; -fx-border-width: 1.5;");
         shake.play();
     }
 
     private void showNotificare(String msg) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION, msg, ButtonType.OK);
-        alert.setTitle(""); alert.setHeaderText(null);
-        alert.getDialogPane().setStyle("-fx-background-color: white; -fx-font-family: 'Segoe UI'; -fx-font-size: 13px;");
-        alert.showAndWait();
+        Label toast = new Label(msg);
+        toast.getStyleClass().add("toast-label");
+        toast.setOpacity(0);
+        toast.setMouseTransparent(true);
+
+        StackPane.setAlignment(toast, Pos.BOTTOM_CENTER);
+        StackPane.setMargin(toast, new Insets(0, 0, 24, 0));
+        detailContainer.getChildren().add(toast);
+
+        FadeTransition fadeIn = new FadeTransition(Duration.millis(300), toast);
+        fadeIn.setFromValue(0); fadeIn.setToValue(1);
+
+        PauseTransition pause = new PauseTransition(Duration.millis(2500));
+
+        FadeTransition fadeOut = new FadeTransition(Duration.millis(400), toast);
+        fadeOut.setFromValue(1); fadeOut.setToValue(0);
+        fadeOut.setOnFinished(e -> detailContainer.getChildren().remove(toast));
+
+        new SequentialTransition(fadeIn, pause, fadeOut).play();
     }
 
     private TextField styledField(String prompt) {
         TextField tf = new TextField();
         tf.setPromptText(prompt);
-        tf.setStyle("-fx-background-color: #f8f4f0; -fx-border-color: transparent; -fx-border-radius: 10; -fx-background-radius: 10; -fx-padding: 9 14 9 14; -fx-font-size: 13px;");
+        tf.setStyle("-fx-background-color: #F5F1EC; -fx-border-color: transparent; -fx-border-radius: 12; -fx-background-radius: 12; -fx-padding: 9 14 9 14; -fx-font-size: 13px;");
         return tf;
     }
 
     private Label boldLabel(String text) {
         Label l = new Label(text);
-        l.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #888;");
+        l.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #9A8F85;");
         return l;
     }
 }

@@ -12,6 +12,7 @@ public class Reteta {
     private List<Ingredient> ingrediente;
     private String instructiuni;
     private int portii;
+    private String imagine; // URL to food image
 
     public Reteta() {
         this.ingrediente = new ArrayList<>();
@@ -53,6 +54,9 @@ public class Reteta {
 
     public int getPortii() { return portii; }
     public void setPortii(int portii) { this.portii = portii; }
+
+    public String getImagine() { return imagine; }
+    public void setImagine(String imagine) { this.imagine = imagine; }
 
     public void adaugaIngredient(Ingredient ingredient) {
         this.ingrediente.add(ingredient);
