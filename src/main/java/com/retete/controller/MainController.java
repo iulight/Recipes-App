@@ -5,6 +5,7 @@ import com.retete.model.Ingredient;
 import com.retete.model.Reteta;
 import com.retete.service.RetetaService;
 import javafx.animation.*;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -16,27 +17,38 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.net.URL;
 import java.util.List;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class MainController implements Initializable {
 
+    // ---- Title Bar ----
+    @FXML private HBox titleBar;
+    @FXML private Button btnClose;
+    @FXML private Button btnMinimize;
+
+    // ---- Sidebar ----
     @FXML private TextField campCautare;
     @FXML private ComboBox<String> comboCategorie;
     @FXML private ListView<Reteta> listaRetete;
     @FXML private Label labelCount;
-    @FXML private Label labelHeaderStats;
 
+    // ---- Content ----
+    @FXML private StackPane detailContainer;
     @FXML private VBox emptyState;
     @FXML private VBox retetaContent;
     @FXML private VBox ingredienteCard;
     @FXML private VBox instructiuniCard;
-    @FXML private Button btnAdaugaInLista;
 
+    // ---- Recipe detail ----
+    @FXML private StackPane imageContainer;
+    @FXML private ImageView heroImage;
+    @FXML private Label imagePlaceholder;
     @FXML private Label labelNume;
     @FXML private Label labelCategorie;
     @FXML private Label labelTimp;
@@ -44,21 +56,22 @@ public class MainController implements Initializable {
     @FXML private Label labelDescriere;
     @FXML private FlowPane panelIngrediente;
     @FXML private TextArea areaInstructiuni;
+    @FXML private Button btnAdaugaInLista;
 
+    // ---- Shopping list (not in new FXML – null-safe) ----
     @FXML private ListView<ElementListaCumparaturi> listaItems;
     @FXML private Label labelTotal;
     @FXML private Label labelCumparate;
     @FXML private Label labelProgres;
+    @FXML private Label labelHeaderStats;
     @FXML private Region progressFill;
     @FXML private HBox progressBox;
-
     @FXML private TextField campNumeItem;
     @FXML private TextField campCantitateItem;
     @FXML private TextField campUnitateItem;
 
-    @FXML private StackPane imageContainer;
-    @FXML private Label imagePlaceholder;
-    @FXML private StackPane detailContainer;
+    private double xOffset = 0;
+    private double yOffset = 0;
 
     private RetetaService service;
     private Reteta retetaSelectata;
@@ -66,9 +79,32 @@ public class MainController implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         service = new RetetaService();
+        setupTitleBar();
         initRetete();
-        initListaCumparaturi();
-        actualizeazaHeaderStats();
+        if (listaItems != null) {
+            initListaCumparaturi();
+        }
+    }
+
+    // ===================== TITLE BAR =====================
+
+    private void setupTitleBar() {
+        if (titleBar == null) return;
+        titleBar.setOnMousePressed(e -> {
+            xOffset = e.getSceneX();
+            yOffset = e.getSceneY();
+        });
+        titleBar.setOnMouseDragged(e -> {
+            Stage stage = (Stage) titleBar.getScene().getWindow();
+            stage.setX(e.getScreenX() - xOffset);
+            stage.setY(e.getScreenY() - yOffset);
+        });
+        if (btnClose != null) {
+            btnClose.setOnAction(e -> Platform.exit());
+        }
+        if (btnMinimize != null) {
+            btnMinimize.setOnAction(e -> ((Stage) btnMinimize.getScene().getWindow()).setIconified(true));
+        }
     }
 
     // ===================== RETETE =====================
@@ -84,7 +120,7 @@ public class MainController implements Initializable {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null); setGraphic(null);
-                    setStyle("-fx-background-color: white;");
+                    setStyle("");
                     return;
                 }
 
@@ -93,27 +129,28 @@ public class MainController implements Initializable {
                 HBox root = new HBox(0);
                 root.setAlignment(Pos.CENTER_LEFT);
 
-                // Indicator lateral verde
                 Region indicator = new Region();
                 indicator.setPrefWidth(4);
                 indicator.setMinWidth(4);
                 indicator.setStyle(selected
-                        ? "-fx-background-color: #3A6B1A;"
+                        ? "-fx-background-color: white;"
                         : "-fx-background-color: transparent;");
 
                 VBox content = new VBox(3);
-                content.setPadding(new Insets(12, 14, 12, 14));
+                content.setPadding(new Insets(10, 14, 10, 10));
                 HBox.setHgrow(content, Priority.ALWAYS);
 
                 Label numeLabel = new Label(item.getNume());
-                numeLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: " + (selected ? "#2D5016;" : "#1A1A1A;"));
+                numeLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: "
+                        + (selected ? "white;" : "rgba(255,255,255,0.9);"));
 
                 HBox meta = new HBox(8);
                 meta.setAlignment(Pos.CENTER_LEFT);
-                Label catLabel = new Label("📂 " + item.getCategorie());
-                catLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #B0A89E;");
+                String emoji = getCategoryEmoji(item.getCategorie());
+                Label catLabel = new Label(emoji + " " + item.getCategorie());
+                catLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.6);");
                 Label timpLabel = new Label("⏱ " + item.getTimpPreparare());
-                timpLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: #B0A89E;");
+                timpLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.6);");
                 meta.getChildren().addAll(catLabel, timpLabel);
 
                 content.getChildren().addAll(numeLabel, meta);
@@ -143,19 +180,15 @@ public class MainController implements Initializable {
     private void afiseazaRetetaAnimat(Reteta r) {
         retetaSelectata = r;
 
-        // Fade out
         FadeTransition fadeOut = new FadeTransition(Duration.millis(120), retetaContent);
         fadeOut.setFromValue(1.0);
         fadeOut.setToValue(0.0);
         fadeOut.setOnFinished(e -> {
             incarcaDateReteta(r);
-            // Fade in
             FadeTransition fadeIn = new FadeTransition(Duration.millis(200), retetaContent);
             fadeIn.setFromValue(0.0);
             fadeIn.setToValue(1.0);
             fadeIn.play();
-
-            // Slide in cards
             animaCard(ingredienteCard, 80);
             animaCard(instructiuniCard, 160);
         });
@@ -171,8 +204,10 @@ public class MainController implements Initializable {
             ingredienteCard.setManaged(true);
             instructiuniCard.setVisible(true);
             instructiuniCard.setManaged(true);
-            btnAdaugaInLista.setVisible(true);
-            btnAdaugaInLista.setManaged(true);
+            if (btnAdaugaInLista != null) {
+                btnAdaugaInLista.setVisible(true);
+                btnAdaugaInLista.setManaged(true);
+            }
             incarcaDateReteta(r);
             animaCard(retetaContent, 0);
             animaCard(ingredienteCard, 80);
@@ -202,69 +237,107 @@ public class MainController implements Initializable {
         labelNume.setText(r.getNume());
         labelCategorie.setText("📂 " + r.getCategorie());
         labelTimp.setText("⏱ " + r.getTimpPreparare());
-        labelPortii.setText("🍽 " + r.getPortii() + " porții");
+        labelPortii.setText("🍽 " + r.getPortii() + " portii");
         labelDescriere.setText(r.getDescriere());
         areaInstructiuni.setText(r.getInstructiuni());
 
-        // Load recipe image asynchronously
-        incarcaImagine(r.getImagine());
+        afiseazaImagineReteta(r);
+        construiesteCartiIngrediente(r.getIngrediente());
+    }
 
-        panelIngrediente.getChildren().clear();
-        for (Ingredient ing : r.getIngrediente()) {
-            HBox chip = new HBox(6);
-            chip.setAlignment(Pos.CENTER_LEFT);
-            chip.getStyleClass().add("ingredient-chip");
+    private void afiseazaImagineReteta(Reteta reteta) {
+        if (heroImage != null) heroImage.setImage(null);
+        if (imagePlaceholder != null) imagePlaceholder.setVisible(true);
 
-            Label dot = new Label("●");
-            dot.setStyle("-fx-text-fill: #3A6B1A; -fx-font-size: 8px;");
-            Label text = new Label(ing.getAfisare());
-            text.getStyleClass().add("ingredient-text");
-
-            chip.getChildren().addAll(dot, text);
-            panelIngrediente.getChildren().add(chip);
+        if (reteta.getImagine() != null && !reteta.getImagine().isEmpty()) {
+            Task<Image> task = new Task<>() {
+                @Override
+                protected Image call() {
+                    return new Image(reteta.getImagine(), true);
+                }
+            };
+            task.setOnSucceeded(e -> {
+                Image img = task.getValue();
+                if (heroImage != null && !img.isError()) {
+                    heroImage.setImage(img);
+                    heroImage.fitWidthProperty().bind(imageContainer.widthProperty());
+                    FadeTransition ft = new FadeTransition(Duration.millis(400), heroImage);
+                    ft.setFromValue(0); ft.setToValue(1);
+                    ft.play();
+                }
+                if (imagePlaceholder != null) imagePlaceholder.setVisible(img.isError());
+            });
+            Thread t = new Thread(task);
+            t.setDaemon(true);
+            t.start();
         }
     }
 
-    private void incarcaImagine(String url) {
-        // Reset to placeholder
-        imageContainer.getChildren().removeIf(n -> n instanceof ImageView);
-        if (imagePlaceholder != null) {
-            imagePlaceholder.setVisible(true);
+    private void construiesteCartiIngrediente(List<Ingredient> ingrediente) {
+        panelIngrediente.getChildren().clear();
+        for (Ingredient ing : ingrediente) {
+            VBox card = new VBox(6);
+            card.setPrefWidth(110);
+            card.setAlignment(Pos.CENTER);
+            card.setPadding(new Insets(12));
+            card.getStyleClass().add("ingredient-card");
+
+            StackPane imgPlaceholder = new StackPane();
+            imgPlaceholder.setPrefSize(70, 70);
+            imgPlaceholder.setStyle("-fx-background-color: #F0EDE8; -fx-background-radius: 50%;");
+            Label emoji = new Label(getEmojiForIngredient(ing.getNume()));
+            emoji.setStyle("-fx-font-size: 28px;");
+            imgPlaceholder.getChildren().add(emoji);
+
+            Label lblNume = new Label(ing.getNume());
+            lblNume.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #1A1A1A;"
+                    + " -fx-text-alignment: center; -fx-wrap-text: true; -fx-max-width: 95px;");
+            lblNume.setWrapText(true);
+            lblNume.setTextAlignment(TextAlignment.CENTER);
+
+            String cantText = (ing.getCantitate() == (long) ing.getCantitate())
+                    ? ((long) ing.getCantitate()) + " " + ing.getUnitate()
+                    : ing.getCantitate() + " " + ing.getUnitate();
+            Label lblCant = new Label(cantText);
+            lblCant.setStyle("-fx-font-size: 11px; -fx-text-fill: #6B7280;");
+
+            card.getChildren().addAll(imgPlaceholder, lblNume, lblCant);
+            panelIngrediente.getChildren().add(card);
         }
+    }
 
-        if (url == null || url.isEmpty()) return;
+    private String getEmojiForIngredient(String name) {
+        if (name == null) return "🌿";
+        String n = name.toLowerCase();
+        if (n.contains("rosie") || n.contains("tomat")) return "🍅";
+        if (n.contains("morcov")) return "🥕";
+        if (n.contains("ceapa")) return "🧅";
+        if (n.contains("usturoi")) return "🧄";
+        if (n.contains("lamaie")) return "🍋";
+        if (n.contains("ou")) return "🥚";
+        if (n.contains("pui") || n.contains("carne")) return "🍗";
+        if (n.contains("paste") || n.contains("spaghetti")) return "🍝";
+        if (n.contains("branza") || n.contains("parmezan")) return "🧀";
+        if (n.contains("lapte") || n.contains("smantana")) return "🥛";
+        if (n.contains("ulei")) return "🫙";
+        if (n.contains("sare") || n.contains("piper")) return "🧂";
+        if (n.contains("faina")) return "🌾";
+        if (n.contains("mar")) return "🍎";
+        return "🌿";
+    }
 
-        Task<Image> task = new Task<>() {
-            @Override
-            protected Image call() {
-                return new Image(url, 600, 220, true, true, false);
-            }
-        };
-
-        task.setOnSucceeded(e -> {
-            Image img = task.getValue();
-            if (!img.isError()) {
-                ImageView iv = new ImageView(img);
-                iv.setFitWidth(imageContainer.getWidth() > 0 ? imageContainer.getWidth() : 600);
-                iv.setFitHeight(220);
-                iv.setPreserveRatio(false);
-                iv.setSmooth(true);
-                // Bind to container width for responsiveness
-                iv.fitWidthProperty().bind(imageContainer.widthProperty());
-                imageContainer.getChildren().add(0, iv);
-                if (imagePlaceholder != null) {
-                    imagePlaceholder.setVisible(false);
-                }
-                // Fade in image
-                FadeTransition fadeIn = new FadeTransition(Duration.millis(400), iv);
-                fadeIn.setFromValue(0); fadeIn.setToValue(1);
-                fadeIn.play();
-            }
-        });
-
-        Thread t = new Thread(task);
-        t.setDaemon(true);
-        t.start();
+    private String getCategoryEmoji(String categorie) {
+        if (categorie == null) return "🍽";
+        String c = categorie.toLowerCase();
+        if (c.contains("paste") || c.contains("spaghett")) return "🍝";
+        if (c.contains("supa") || c.contains("ciorba")) return "🍲";
+        if (c.contains("salata")) return "🥗";
+        if (c.contains("desert") || c.contains("prajitura")) return "🍰";
+        if (c.contains("carne") || c.contains("grill")) return "🥩";
+        if (c.contains("peste") || c.contains("fructe de mare")) return "🐟";
+        if (c.contains("pizza")) return "🍕";
+        if (c.contains("sandvi") || c.contains("burger")) return "🥪";
+        return "🍽";
     }
 
     private void filtreaza() {
@@ -278,13 +351,21 @@ public class MainController implements Initializable {
 
     private void actualizeazaCount() {
         int n = listaRetete.getItems().size();
-        labelCount.setText(n + (n == 1 ? " rețetă" : " rețete"));
+        labelCount.setText(n + (n == 1 ? " reteta" : " retete"));
     }
 
     private void actualizeazaHeaderStats() {
+        if (labelHeaderStats == null) return;
         int total = service.getRetete().size();
         int lista = service.getListaCumparaturi().size();
-        labelHeaderStats.setText(total + " rețete  ·  " + lista + " produse în coș");
+        labelHeaderStats.setText(total + " retete  ·  " + lista + " produse in cos");
+    }
+
+    // ===================== FXML HANDLERS =====================
+
+    @FXML
+    private void adaugaInListaCumparaturi() {
+        onAdaugaInLista();
     }
 
     @FXML
@@ -294,23 +375,24 @@ public class MainController implements Initializable {
         actualizeazaStatisticeLista();
         actualizeazaHeaderStats();
 
-        // Animatie buton
-        ScaleTransition scale = new ScaleTransition(Duration.millis(100), btnAdaugaInLista);
-        scale.setFromX(1); scale.setFromY(1);
-        scale.setToX(0.95); scale.setToY(0.95);
-        scale.setAutoReverse(true); scale.setCycleCount(2);
-        scale.play();
+        if (btnAdaugaInLista != null) {
+            ScaleTransition scale = new ScaleTransition(Duration.millis(100), btnAdaugaInLista);
+            scale.setFromX(1); scale.setFromY(1);
+            scale.setToX(0.95); scale.setToY(0.95);
+            scale.setAutoReverse(true); scale.setCycleCount(2);
+            scale.play();
+        }
 
-        showNotificare("✅  Ingredientele din \"" + retetaSelectata.getNume() + "\" au fost adăugate!");
+        showNotificare("✅  Ingredientele din \"" + retetaSelectata.getNume() + "\" au fost adaugate!");
     }
 
     @FXML
     private void onAdaugaReteta() {
         Dialog<Reteta> dialog = new Dialog<>();
-        dialog.setTitle("Rețetă Nouă");
+        dialog.setTitle("Reteta Noua");
         dialog.setHeaderText(null);
 
-        ButtonType btnSalveaza = new ButtonType("✅  Salvează", ButtonBar.ButtonData.OK_DONE);
+        ButtonType btnSalveaza = new ButtonType("✅  Salveaza", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(btnSalveaza, ButtonType.CANCEL);
         dialog.getDialogPane().setStyle("-fx-background-color: white; -fx-font-family: 'Segoe UI';");
 
@@ -319,25 +401,25 @@ public class MainController implements Initializable {
         grid.setPadding(new Insets(20));
         grid.setStyle("-fx-background-color: white;");
 
-        TextField tfNume = styledField("ex: Ciorba de burtă");
+        TextField tfNume = styledField("ex: Ciorba de burta");
         TextField tfCategorie = styledField("ex: Supe & Ciorbe");
         TextField tfTimp = styledField("ex: 45 min");
         TextField tfPortii = styledField("4");
         TextArea taDescriere = new TextArea();
-        taDescriere.setPromptText("Descriere scurtă...");
+        taDescriere.setPromptText("Descriere scurta...");
         taDescriere.setPrefHeight(70);
         taDescriere.setStyle("-fx-background-color: #F5F1EC; -fx-border-color: transparent; -fx-background-radius: 12; -fx-font-size: 13px;");
         TextArea taInstructiuni = new TextArea();
-        taInstructiuni.setPromptText("Pașii de preparare...");
+        taInstructiuni.setPromptText("Pasii de preparare...");
         taInstructiuni.setPrefHeight(110);
         taInstructiuni.setStyle("-fx-background-color: #F5F1EC; -fx-border-color: transparent; -fx-background-radius: 12; -fx-font-size: 13px;");
 
-        grid.add(boldLabel("Nume rețetă *"), 0, 0); grid.add(tfNume, 1, 0);
+        grid.add(boldLabel("Nume reteta *"), 0, 0); grid.add(tfNume, 1, 0);
         grid.add(boldLabel("Categorie"), 0, 1); grid.add(tfCategorie, 1, 1);
         grid.add(boldLabel("Timp preparare"), 0, 2); grid.add(tfTimp, 1, 2);
-        grid.add(boldLabel("Porții"), 0, 3); grid.add(tfPortii, 1, 3);
+        grid.add(boldLabel("Portii"), 0, 3); grid.add(tfPortii, 1, 3);
         grid.add(boldLabel("Descriere"), 0, 4); grid.add(taDescriere, 1, 4);
-        grid.add(boldLabel("Instrucțiuni"), 0, 5); grid.add(taInstructiuni, 1, 5);
+        grid.add(boldLabel("Instructiuni"), 0, 5); grid.add(taInstructiuni, 1, 5);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().setMinWidth(520);
@@ -355,7 +437,7 @@ public class MainController implements Initializable {
         });
 
         dialog.showAndWait().ifPresent(r -> {
-            if (!r.getNume().isEmpty()) {
+            if (r != null && !r.getNume().isEmpty()) {
                 service.adaugaReteta(r);
                 comboCategorie.setItems(FXCollections.observableList(service.getCategorii()));
                 listaRetete.setItems(service.getRetete());
@@ -371,8 +453,8 @@ public class MainController implements Initializable {
         if (retetaSelectata == null) return;
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmare");
-        confirm.setHeaderText("Ștergi rețeta?");
-        confirm.setContentText("\"" + retetaSelectata.getNume() + "\" va fi ștearsă definitiv.");
+        confirm.setHeaderText("Stergi reteta?");
+        confirm.setContentText("\"" + retetaSelectata.getNume() + "\" va fi stearsa definitiv.");
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.OK) {
                 service.stergeReteta(retetaSelectata);
@@ -383,7 +465,9 @@ public class MainController implements Initializable {
                 retetaContent.setVisible(false); retetaContent.setManaged(false);
                 ingredienteCard.setVisible(false); ingredienteCard.setManaged(false);
                 instructiuniCard.setVisible(false); instructiuniCard.setManaged(false);
-                btnAdaugaInLista.setVisible(false); btnAdaugaInLista.setManaged(false);
+                if (btnAdaugaInLista != null) {
+                    btnAdaugaInLista.setVisible(false); btnAdaugaInLista.setManaged(false);
+                }
                 emptyState.setVisible(true); emptyState.setManaged(true);
             }
         });
@@ -392,6 +476,7 @@ public class MainController implements Initializable {
     // ===================== LISTA CUMPARATURI =====================
 
     private void initListaCumparaturi() {
+        if (listaItems == null) return;
         listaItems.setItems(service.getListaCumparaturi());
         listaItems.setCellFactory(lv -> new ListCell<>() {
             @Override
@@ -423,14 +508,13 @@ public class MainController implements Initializable {
                 textLabel.setStyle(textStyle);
 
                 Label sursa = new Label("din: " + item.getDinReteta());
-                sursa.setStyle("-fx-font-size: 11px; -fx-text-fill: " + (item.isCumparat() ? "#D8D0C8;" : "#3A6B1A;"));
+                sursa.setStyle("-fx-font-size: 11px; -fx-text-fill: " + (item.isCumparat() ? "#D8D0C8;" : "#2D6A4F;"));
 
                 info.getChildren().addAll(textLabel, sursa);
 
-                // Checkmark icon dacă e cumparat
                 if (item.isCumparat()) {
                     Label check = new Label("✓");
-                    check.setStyle("-fx-text-fill: #3A6B1A; -fx-font-size: 16px; -fx-font-weight: bold;");
+                    check.setStyle("-fx-text-fill: #2D6A4F; -fx-font-size: 16px; -fx-font-weight: bold;");
                     row.getChildren().addAll(cb, info, check);
                 } else {
                     row.getChildren().addAll(cb, info);
@@ -448,15 +532,14 @@ public class MainController implements Initializable {
         long cumparate = service.getListaCumparaturi().stream()
                 .filter(ElementListaCumparaturi::isCumparat).count();
 
-        labelTotal.setText(total + " produse");
-        labelCumparate.setText(cumparate + " bifate");
-        labelProgres.setText(total > 0 ? (int)(cumparate * 100.0 / total) + "%" : "0%");
+        if (labelTotal != null) labelTotal.setText(total + " produse");
+        if (labelCumparate != null) labelCumparate.setText(cumparate + " bifate");
+        if (labelProgres != null)
+            labelProgres.setText(total > 0 ? (int)(cumparate * 100.0 / total) + "%" : "0%");
 
-        // Animatie progress bar
         if (progressFill != null && progressBox != null) {
             double ratio = total > 0 ? (double) cumparate / total : 0;
             double targetWidth = progressBox.getWidth() * ratio;
-
             Timeline timeline = new Timeline(
                     new KeyFrame(Duration.millis(400),
                             new KeyValue(progressFill.prefWidthProperty(), targetWidth, Interpolator.EASE_OUT))
@@ -469,12 +552,13 @@ public class MainController implements Initializable {
 
     @FXML
     private void onAdaugaItemManual() {
+        if (campNumeItem == null) return;
         String nume = campNumeItem.getText().trim();
-        String cantStr = campCantitateItem.getText().trim();
-        String unitate = campUnitateItem.getText().trim();
+        String cantStr = campCantitateItem != null ? campCantitateItem.getText().trim() : "";
+        String unitate = campUnitateItem != null ? campUnitateItem.getText().trim() : "";
 
         if (nume.isEmpty()) {
-            shakeField(campNumeItem);
+            if (campNumeItem != null) shakeField(campNumeItem);
             return;
         }
 
@@ -482,7 +566,7 @@ public class MainController implements Initializable {
         try {
             if (!cantStr.isEmpty()) cantitate = Double.parseDouble(cantStr);
         } catch (NumberFormatException e) {
-            shakeField(campCantitateItem);
+            if (campCantitateItem != null) shakeField(campCantitateItem);
             return;
         }
 
@@ -492,13 +576,14 @@ public class MainController implements Initializable {
         actualizeazaStatisticeLista();
 
         campNumeItem.clear();
-        campCantitateItem.clear();
-        campUnitateItem.clear();
+        if (campCantitateItem != null) campCantitateItem.clear();
+        if (campUnitateItem != null) campUnitateItem.clear();
         campNumeItem.requestFocus();
     }
 
     @FXML
     private void onStergeItem() {
+        if (listaItems == null) return;
         ElementListaCumparaturi sel = listaItems.getSelectionModel().getSelectedItem();
         if (sel != null) {
             service.stergeElementLista(sel);
@@ -516,9 +601,9 @@ public class MainController implements Initializable {
     private void onGolesteLista() {
         if (service.getListaCumparaturi().isEmpty()) return;
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Golire listă");
-        confirm.setHeaderText("Golești lista de cumpărături?");
-        confirm.setContentText("Toate produsele vor fi șterse.");
+        confirm.setTitle("Golire lista");
+        confirm.setHeaderText("Golesti lista de cumparaturi?");
+        confirm.setContentText("Toate produsele vor fi sterse.");
         confirm.showAndWait().ifPresent(btn -> {
             if (btn == ButtonType.OK) {
                 service.golesteLista();
@@ -534,11 +619,11 @@ public class MainController implements Initializable {
         shake.setFromX(0); shake.setByX(8); shake.setCycleCount(4);
         shake.setAutoReverse(true);
         shake.setOnFinished(e -> field.setTranslateX(0));
-        field.setStyle(field.getStyle() + " -fx-border-color: #C8553D; -fx-border-width: 1.5;");
         shake.play();
     }
 
     private void showNotificare(String msg) {
+        if (detailContainer == null) return;
         Label toast = new Label(msg);
         toast.getStyleClass().add("toast-label");
         toast.setOpacity(0);

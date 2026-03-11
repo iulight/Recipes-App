@@ -1,6 +1,7 @@
 module com.retete {
     requires javafx.controls;
     requires javafx.fxml;
+    requires javafx.graphics;
     requires org.json;
 
     opens com.retete to javafx.fxml;
