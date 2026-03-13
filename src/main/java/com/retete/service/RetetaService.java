@@ -55,7 +55,7 @@ public class RetetaService {
 
         Reteta tort = new Reteta(uuid(), "Tort de Ciocolata", "Deserturi",
                 "90 min", "Tort umed si bogat cu glazura de ciocolata.",
-                "1. Incalzeste cuptorul la 180\u00b0C.\n2. Amesteca faina, cacao, zaharul, soda.\n3. Adauga ouale, laptele si uleiul.\n4. Coace 35 min in tava unsa.\n5. Prepara glazura din ciocolata si smantana.\n6. Acopera tortul racit cu glazura.",
+                "1. Incalzeste cuptorul la 180°C.\n2. Amesteca faina, cacao, zaharul, soda.\n3. Adauga ouale, laptele si uleiul.\n4. Coace 35 min in tava unsa.\n5. Prepara glazura din ciocolata si smantana.\n6. Acopera tortul racit cu glazura.",
                 8);
         tort.adaugaIngredient(new Ingredient("Faina", 250, "g"));
         tort.adaugaIngredient(new Ingredient("Cacao", 80, "g"));

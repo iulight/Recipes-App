@@ -777,7 +777,7 @@ public class MainController implements Initializable {
         String c = categorie.toLowerCase();
         if (c.contains("paste") || c.contains("spaghett")) return "🍝";
         if (c.contains("supa") || c.contains("ciorba")) return "🍲";
-        if (c.contains("salata")) return "��";
+        if (c.contains("salata")) return "\uD83E\uDD57"; // 🥗
         if (c.contains("desert") || c.contains("prajitura")) return "🍰";
         if (c.contains("carne") || c.contains("grill")) return "🥩";
         if (c.contains("peste") || c.contains("fructe de mare")) return "🐟";
