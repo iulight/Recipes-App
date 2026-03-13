@@ -15,7 +15,7 @@
         <HBox fx:id="titleBar" styleClass="title-bar" prefHeight="44" alignment="CENTER_RIGHT" spacing="8"
               style="-fx-background-color: transparent; -fx-padding: 0 16 0 20;">
             <HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-                <Label text="🌿 RecipeBook" styleClass="sidebar-logo"
+                <Label text="&#127807; RecipeBook" styleClass="sidebar-logo"
                        style="-fx-font-size: 16px; -fx-text-fill: #2D6A4F;"/>
             </HBox>
             <Button fx:id="btnMinimize" styleClass="btn-minimize" text=""/>
@@ -25,112 +25,269 @@
         <!-- MAIN CONTENT -->
         <HBox VBox.vgrow="ALWAYS">
 
-            <!-- SIDEBAR -->
-            <VBox fx:id="sidebar" styleClass="sidebar" prefWidth="270" spacing="0">
-                <padding><Insets top="20" right="16" bottom="20" left="16"/></padding>
+            <!-- NAV SIDEBAR -->
+            <VBox fx:id="navSidebar" styleClass="nav-sidebar" prefWidth="210" spacing="4">
+                <padding><Insets top="20" right="12" bottom="20" left="12"/></padding>
 
-                <Label text="🌿 RecipeBook" styleClass="sidebar-logo"/>
-                <Label text="Planificator de Rețete Organice"
-                       style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.6); -fx-padding: 2 0 20 0;"/>
+                <Label text="&#127807; RecipeBook" styleClass="sidebar-logo"/>
+                <Label text="Planificator de Retete" style="-fx-font-size: 10px; -fx-text-fill: rgba(255,255,255,0.6); -fx-padding: 2 0 24 0;"/>
 
-                <TextField fx:id="campCautare" styleClass="sidebar-search"
-                           promptText="&#128269;  Cauta retete..." maxWidth="Infinity">
-                    <VBox.margin><Insets bottom="8"/></VBox.margin>
-                </TextField>
+                <Button fx:id="btnNavDashboard" text="&#127968;  Dashboard" styleClass="nav-btn,nav-btn-active"
+                        maxWidth="Infinity" onAction="#onNavDashboard"/>
+                <Button fx:id="btnNavRecipes" text="&#128203;  Retete" styleClass="nav-btn"
+                        maxWidth="Infinity" onAction="#onNavRecipes"/>
+                <Button fx:id="btnNavShopping" text="&#128722;  Lista Cumparaturi" styleClass="nav-btn"
+                        maxWidth="Infinity" onAction="#onNavShopping"/>
 
-                <ComboBox fx:id="comboCategorie" styleClass="sidebar-combo" maxWidth="Infinity"/>
+                <Region VBox.vgrow="ALWAYS"/>
 
                 <Separator style="-fx-background-color: rgba(255,255,255,0.15);">
-                    <VBox.margin><Insets top="12" bottom="4"/></VBox.margin>
+                    <VBox.margin><Insets top="8" bottom="8"/></VBox.margin>
                 </Separator>
-
-                <HBox alignment="CENTER_LEFT" style="-fx-padding: 8 0 4 0;">
-                    <Label text="RETETE" style="-fx-font-size: 10px; -fx-font-weight: bold;
-                                               -fx-text-fill: rgba(255,255,255,0.5);"/>
-                    <Label fx:id="labelCount" style="-fx-font-size: 10px; -fx-text-fill: rgba(255,255,255,0.5);
-                                                      -fx-padding: 0 0 0 8;"/>
-                </HBox>
-
-                <ListView fx:id="listaRetete" styleClass="recipe-list" VBox.vgrow="ALWAYS"/>
+                <Label fx:id="labelHeaderStats" style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.5); -fx-padding: 4 4 4 4; -fx-wrap-text: true;"/>
             </VBox>
 
-            <!-- CONTENT AREA -->
-            <StackPane fx:id="detailContainer" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
+            <!-- CONTENT AREA (3 views, visibility-toggled) -->
+            <StackPane fx:id="contentArea" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
                        style="-fx-background-color: #F5F5F0;">
 
-                <!-- RECIPE DETAIL (behind empty state) -->
-                <ScrollPane fx:id="detailScrollPane" fitToWidth="true"
-                            style="-fx-background-color: transparent; -fx-background: #F5F5F0; -fx-border-width: 0;">
-                    <VBox fx:id="retetaContent" spacing="16" style="-fx-padding: 25px;" visible="false">
+                <!-- ===== DASHBOARD VIEW ===== -->
+                <VBox fx:id="dashboardView" spacing="0">
+                    <HBox alignment="CENTER_LEFT" spacing="12"
+                          style="-fx-padding: 20 24 12 24; -fx-background-color: rgba(255,255,255,0.6); -fx-border-color: rgba(0,0,0,0.05); -fx-border-width: 0 0 1 0;">
+                        <VBox spacing="2" HBox.hgrow="ALWAYS">
+                            <Label text="Bine ai venit! &#127807;" styleClass="page-title"/>
+                            <Label text="Alege o reteta si incepe sa gatesti" style="-fx-font-size: 13px; -fx-text-fill: #6B7280;"/>
+                        </VBox>
+                        <TextField fx:id="dashSearch" promptText="&#128269; Cauta retete..."
+                                   styleClass="dash-search" prefWidth="220" onKeyReleased="#onDashSearch"/>
+                    </HBox>
 
-                        <!-- Hero Image -->
-                        <StackPane fx:id="imageContainer" prefHeight="220"
-                                   style="-fx-background-color: #E8E4DC; -fx-background-radius: 16px;">
-                            <ImageView fx:id="heroImage" fitWidth="700" fitHeight="220"
-                                       preserveRatio="false" smooth="true"/>
-                            <Label fx:id="imagePlaceholder" text="&#127859;"
-                                   style="-fx-font-size: 60px; -fx-opacity: 0.3;"/>
-                        </StackPane>
+                    <ScrollPane VBox.vgrow="ALWAYS" fitToWidth="true"
+                                style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-width: 0;">
+                        <FlowPane fx:id="dashGrid" hgap="18" vgap="18"
+                                  style="-fx-padding: 24px; -fx-background-color: transparent;"/>
+                    </ScrollPane>
+                </VBox>
 
-                        <!-- Recipe Header -->
-                        <VBox spacing="8" style="-fx-padding: 4 0 0 0;">
-                            <Label fx:id="labelNume" styleClass="recipe-title" wrapText="true"/>
-                            <HBox spacing="8" alignment="CENTER_LEFT">
-                                <Label fx:id="labelCategorie" styleClass="meta-label"/>
-                                <Label fx:id="labelTimp" styleClass="meta-label"/>
-                                <Label fx:id="labelPortii" styleClass="meta-label"/>
-                            </HBox>
-                            <Label fx:id="labelDescriere" wrapText="true"
-                                   style="-fx-font-size: 14px; -fx-text-fill: #6B7280; -fx-padding: 4 0 0 0;"/>
+                <!-- ===== RECIPES VIEW ===== -->
+                <HBox fx:id="recipesView" visible="false" managed="false">
+
+                    <!-- Recipe list sidebar -->
+                    <VBox fx:id="sidebar" styleClass="sidebar" prefWidth="270" spacing="0">
+                        <padding><Insets top="20" right="16" bottom="20" left="16"/></padding>
+
+                        <Label text="&#128203; Retete" styleClass="sidebar-logo"/>
+                        <Label text="Colectia ta de retete"
+                               style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.6); -fx-padding: 2 0 20 0;"/>
+
+                        <TextField fx:id="campCautare" styleClass="sidebar-search"
+                                   promptText="&#128269;  Cauta retete..." maxWidth="Infinity">
+                            <VBox.margin><Insets bottom="8"/></VBox.margin>
+                        </TextField>
+
+                        <ComboBox fx:id="comboCategorie" styleClass="sidebar-combo" maxWidth="Infinity"/>
+
+                        <Separator style="-fx-background-color: rgba(255,255,255,0.15);">
+                            <VBox.margin><Insets top="12" bottom="4"/></VBox.margin>
+                        </Separator>
+
+                        <HBox alignment="CENTER_LEFT" style="-fx-padding: 8 0 4 0;">
+                            <Label text="RETETE" style="-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: rgba(255,255,255,0.5);"/>
+                            <Label fx:id="labelCount" style="-fx-font-size: 10px; -fx-text-fill: rgba(255,255,255,0.5); -fx-padding: 0 0 0 8;"/>
+                        </HBox>
+
+                        <ListView fx:id="listaRetete" styleClass="recipe-list" VBox.vgrow="ALWAYS"/>
+
+                        <Separator style="-fx-background-color: rgba(255,255,255,0.15);">
+                            <VBox.margin><Insets top="8" bottom="8"/></VBox.margin>
+                        </Separator>
+                        <HBox spacing="8">
+                            <Button text="+ Reteta" styleClass="btn-sidebar-action" maxWidth="Infinity"
+                                    HBox.hgrow="ALWAYS" onAction="#onAdaugaReteta"/>
+                            <Button text="Sterge" styleClass="btn-sidebar-danger" maxWidth="Infinity"
+                                    HBox.hgrow="ALWAYS" onAction="#onStergeReteta"/>
+                        </HBox>
+                    </VBox>
+
+                    <!-- Recipe detail -->
+                    <StackPane fx:id="detailContainer" VBox.vgrow="ALWAYS" HBox.hgrow="ALWAYS"
+                               style="-fx-background-color: #F5F5F0;">
+
+                        <ScrollPane fx:id="detailScrollPane" fitToWidth="true"
+                                    style="-fx-background-color: transparent; -fx-background: #F5F5F0; -fx-border-width: 0;">
+                            <VBox fx:id="retetaContent" spacing="16" style="-fx-padding: 25px;" visible="false">
+
+                                <StackPane fx:id="imageContainer" prefHeight="220"
+                                           style="-fx-background-color: #E8E4DC; -fx-background-radius: 16px;">
+                                    <ImageView fx:id="heroImage" fitWidth="700" fitHeight="220"
+                                               preserveRatio="false" smooth="true"/>
+                                    <Label fx:id="imagePlaceholder" text="&#127859;"
+                                           style="-fx-font-size: 60px; -fx-opacity: 0.3;"/>
+                                </StackPane>
+
+                                <VBox spacing="8" style="-fx-padding: 4 0 0 0;">
+                                    <Label fx:id="labelNume" styleClass="recipe-title" wrapText="true"/>
+                                    <HBox spacing="8" alignment="CENTER_LEFT">
+                                        <Label fx:id="labelCategorie" styleClass="meta-label"/>
+                                        <Label fx:id="labelTimp" styleClass="meta-label"/>
+                                        <Label fx:id="labelPortii" styleClass="meta-label"/>
+                                    </HBox>
+                                    <Label fx:id="labelDescriere" wrapText="true"
+                                           style="-fx-font-size: 14px; -fx-text-fill: #6B7280; -fx-padding: 4 0 0 0;"/>
+                                </VBox>
+
+                                <HBox spacing="16">
+                                    <VBox fx:id="ingredienteCard" styleClass="glass-card" HBox.hgrow="ALWAYS" spacing="12">
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <Label text="&#129388;" style="-fx-font-size: 18px;"/>
+                                            <Label text="Ingrediente" styleClass="section-title"/>
+                                        </HBox>
+                                        <ScrollPane fitToWidth="true" prefHeight="220"
+                                                    style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-width: 0;">
+                                            <FlowPane fx:id="panelIngrediente" hgap="12" vgap="12"
+                                                      style="-fx-padding: 4px;"/>
+                                        </ScrollPane>
+                                    </VBox>
+
+                                    <VBox fx:id="instructiuniCard" styleClass="glass-card" prefWidth="280" spacing="12">
+                                        <HBox alignment="CENTER_LEFT" spacing="8">
+                                            <Label text="&#128203;" style="-fx-font-size: 18px;"/>
+                                            <Label text="Instructiuni" styleClass="section-title"/>
+                                        </HBox>
+                                        <TextArea fx:id="areaInstructiuni" styleClass="instructions-area"
+                                                  editable="false" wrapText="true" prefHeight="220"
+                                                  style="-fx-background-color: transparent; -fx-border-width: 0;"/>
+                                    </VBox>
+                                </HBox>
+
+                                <HBox alignment="CENTER_LEFT">
+                                    <Button fx:id="btnAdaugaInLista" text="&#10133;  Adauga la Lista de Cumparaturi"
+                                            styleClass="btn-primary" onAction="#adaugaInListaCumparaturi"/>
+                                </HBox>
+
+                            </VBox>
+                        </ScrollPane>
+
+                        <VBox fx:id="emptyState" alignment="CENTER" spacing="16" style="-fx-padding: 40;">
+                            <Label text="&#127807;" styleClass="empty-icon"/>
+                            <Label text="Selecteaza o reteta" styleClass="empty-title"/>
+                            <Label text="Alege o reteta din lista din stanga pentru a vedea detaliile"
+                                   styleClass="empty-subtitle" wrapText="true" textAlignment="CENTER"/>
                         </VBox>
 
-                        <!-- Two columns: Ingredients + Instructions -->
-                        <HBox spacing="16">
+                    </StackPane>
+                </HBox>
 
-                            <!-- Ingredients Card -->
-                            <VBox fx:id="ingredienteCard" styleClass="glass-card" HBox.hgrow="ALWAYS" spacing="12">
-                                <HBox alignment="CENTER_LEFT" spacing="8">
-                                    <Label text="&#129388;" style="-fx-font-size: 18px;"/>
-                                    <Label text="Ingrediente" styleClass="section-title"/>
+                <!-- ===== SHOPPING LIST VIEW ===== -->
+                <VBox fx:id="shoppingView" spacing="0" visible="false" managed="false">
+
+                    <!-- Date bar -->
+                    <HBox fx:id="dateBar" styleClass="date-bar" alignment="CENTER_LEFT" spacing="10"
+                          style="-fx-padding: 12 20 12 20;">
+                        <Label text="&#128197; Filtrare:" style="-fx-font-weight: bold; -fx-text-fill: #2D6A4F; -fx-font-size: 13px;"/>
+                        <DatePicker fx:id="dateStart" promptText="Data inceput" prefWidth="150"/>
+                        <Label text="&#8212;" style="-fx-text-fill: #6B7280;"/>
+                        <DatePicker fx:id="dateEnd" promptText="Data sfarsit" prefWidth="150"/>
+                        <Button text="Filtreaza" styleClass="btn-secondary" onAction="#onFilterByDate"/>
+                        <Separator orientation="VERTICAL"/>
+                        <Button text="Azi" styleClass="btn-filter" onAction="#onFilterToday"/>
+                        <Button text="Saptamana" styleClass="btn-filter" onAction="#onFilterWeek"/>
+                        <Button text="Luna" styleClass="btn-filter" onAction="#onFilterMonth"/>
+                    </HBox>
+
+                    <Separator/>
+
+                    <!-- Two-column layout -->
+                    <HBox VBox.vgrow="ALWAYS" spacing="0">
+
+                        <!-- LEFT: Shopping list + form -->
+                        <VBox styleClass="shopping-panel" prefWidth="420" spacing="0">
+
+                            <HBox alignment="CENTER_LEFT" spacing="8"
+                                  style="-fx-padding: 14 20 6 20; -fx-background-color: rgba(255,255,255,0.5);">
+                                <Label text="&#128722; Lista de Cumparaturi" styleClass="panel-title"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="labelTotal" style="-fx-font-size: 12px; -fx-text-fill: #6B7280;"/>
+                            </HBox>
+
+                            <!-- Add item form -->
+                            <VBox styleClass="add-item-form" spacing="8"
+                                  style="-fx-padding: 12 16 12 16; -fx-background-color: rgba(245,245,240,0.8);">
+                                <Label text="Adauga produs nou" style="-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #2D6A4F;"/>
+                                <HBox spacing="8">
+                                    <TextField fx:id="campNumeItem" promptText="Nume produs *"
+                                               HBox.hgrow="ALWAYS" styleClass="form-field"/>
+                                    <TextField fx:id="campCantitateItem" promptText="Cant."
+                                               prefWidth="68" styleClass="form-field"/>
+                                    <TextField fx:id="campUnitateItem" promptText="UM"
+                                               prefWidth="56" styleClass="form-field"/>
                                 </HBox>
-                                <ScrollPane fitToWidth="true" prefHeight="220"
-                                            style="-fx-background-color: transparent; -fx-background: transparent; -fx-border-width: 0;">
-                                    <FlowPane fx:id="panelIngrediente" hgap="12" vgap="12"
-                                              style="-fx-padding: 4px;"/>
-                                </ScrollPane>
+                                <HBox spacing="8">
+                                    <TextField fx:id="campCategorie" promptText="Categorie"
+                                               HBox.hgrow="ALWAYS" styleClass="form-field"/>
+                                    <TextField fx:id="campPret" promptText="Pret"
+                                               prefWidth="76" styleClass="form-field"/>
+                                    <Button text="&#10010; Adauga" styleClass="btn-primary"
+                                            onAction="#onAdaugaItemManual"/>
+                                </HBox>
                             </VBox>
 
-                            <!-- Instructions Card -->
-                            <VBox fx:id="instructiuniCard" styleClass="glass-card" prefWidth="280" spacing="12">
-                                <HBox alignment="CENTER_LEFT" spacing="8">
-                                    <Label text="&#128203;" style="-fx-font-size: 18px;"/>
-                                    <Label text="Instructiuni" styleClass="section-title"/>
-                                </HBox>
-                                <TextArea fx:id="areaInstructiuni" styleClass="instructions-area"
-                                          editable="false" wrapText="true" prefHeight="220"
-                                          style="-fx-background-color: transparent; -fx-border-width: 0;"/>
-                            </VBox>
-                        </HBox>
+                            <Separator/>
 
-                        <!-- Add to Shopping List Button -->
-                        <HBox alignment="CENTER_LEFT">
-                            <Button fx:id="btnAdaugaInLista" text="&#10133;  Adauga la Lista de Cumparaturi"
-                                    styleClass="btn-primary" onAction="#adaugaInListaCumparaturi"/>
-                        </HBox>
+                            <!-- Stats bar -->
+                            <HBox alignment="CENTER_LEFT" spacing="12"
+                                  style="-fx-padding: 6 16 6 16; -fx-background-color: rgba(255,255,255,0.4);">
+                                <Label fx:id="labelCumparate"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #2D6A4F; -fx-font-weight: bold;"/>
+                                <Label fx:id="labelProgres"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #6B7280;"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Button text="Sterge bifate" styleClass="btn-small" onAction="#onStergeCumparate"/>
+                                <Button text="Goleste" styleClass="btn-small-danger" onAction="#onGolesteLista"/>
+                            </HBox>
 
-                    </VBox>
-                </ScrollPane>
+                            <!-- Progress bar -->
+                            <ProgressBar fx:id="progressBar" maxWidth="Infinity" prefHeight="6"
+                                         style="-fx-accent: #2D6A4F; -fx-padding: 0 0 4 0;"/>
 
-                <!-- EMPTY STATE (on top, visible initially) -->
-                <VBox fx:id="emptyState" alignment="CENTER" spacing="16" style="-fx-padding: 40;">
-                    <Label text="&#127807;" styleClass="empty-icon"/>
-                    <Label text="Bine ai venit in RecipeBook!" styleClass="empty-title"/>
-                    <Label text="Selecteaza o reteta din stanga pentru a vedea detaliile"
-                           styleClass="empty-subtitle" wrapText="true" textAlignment="CENTER"/>
+                            <Separator/>
+
+                            <!-- Shopping list -->
+                            <ListView fx:id="listaItems" styleClass="shopping-list" VBox.vgrow="ALWAYS"/>
+                        </VBox>
+
+                        <Separator orientation="VERTICAL"/>
+
+                        <!-- RIGHT: Purchase history -->
+                        <VBox HBox.hgrow="ALWAYS" spacing="0">
+
+                            <HBox alignment="CENTER_LEFT" spacing="8"
+                                  style="-fx-padding: 14 20 6 20; -fx-background-color: rgba(255,255,255,0.5);">
+                                <Label text="&#128220; Istoric Cumparaturi" styleClass="panel-title"/>
+                                <Region HBox.hgrow="ALWAYS"/>
+                                <Label fx:id="labelHistoryCount"
+                                       style="-fx-font-size: 12px; -fx-text-fill: #6B7280;"/>
+                            </HBox>
+
+                            <TableView fx:id="tableIstoric" VBox.vgrow="ALWAYS" styleClass="history-table">
+                                <columns>
+                                    <TableColumn fx:id="colProdus" text="Produs" prefWidth="150"/>
+                                    <TableColumn fx:id="colCantitate" text="Cantitate" prefWidth="90"/>
+                                    <TableColumn fx:id="colCategorie" text="Categorie" prefWidth="110"/>
+                                    <TableColumn fx:id="colPret" text="Pret (lei)" prefWidth="80"/>
+                                    <TableColumn fx:id="colData" text="Data / Ora" prefWidth="140"/>
+                                </columns>
+                                <placeholder>
+                                    <Label text="Nicio cumparatura inregistrata." style="-fx-text-fill: #9A8F85;"/>
+                                </placeholder>
+                            </TableView>
+                        </VBox>
+
+                    </HBox>
                 </VBox>
 
             </StackPane>
-
         </HBox>
     </VBox>
 
