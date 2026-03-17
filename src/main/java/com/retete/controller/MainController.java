@@ -4,6 +4,7 @@ import com.retete.model.ElementListaCumparaturi;
 import com.retete.model.Ingredient;
 import com.retete.model.PurchaseEvent;
 import com.retete.model.Reteta;
+import com.retete.service.IngredientIconService;
 import com.retete.service.RetetaService;
 import javafx.animation.*;
 import javafx.application.Platform;
@@ -104,6 +105,7 @@ public class MainController implements Initializable {
     private double xOffset = 0;
     private double yOffset = 0;
     private RetetaService service;
+    private static final int INGREDIENT_ICON_SIZE = 46;
     private Reteta retetaSelectata;
     private static final DateTimeFormatter DT_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm");
 
@@ -205,10 +207,7 @@ public class MainController implements Initializable {
         // Image area
         StackPane imgArea = new StackPane();
         imgArea.setPrefHeight(130);
-        imgArea.setStyle("-fx-background-color: #E8E4DC; -fx-background-radius: 14 14 0 0;");
-        Label emojiPh = new Label(getCategoryEmoji(r.getCategorie()));
-        emojiPh.setStyle("-fx-font-size: 42px; -fx-opacity: 0.5;");
-        imgArea.getChildren().add(emojiPh);
+        imgArea.setStyle("-fx-background-color: #f3f3eb; -fx-background-radius: 14 14 0 0;");
 
         if (r.getImagine() != null && !r.getImagine().isEmpty()) {
             ImageView iv = new ImageView();
@@ -217,7 +216,7 @@ public class MainController implements Initializable {
             iv.setPreserveRatio(false);
             iv.setSmooth(true);
             iv.setStyle("-fx-background-radius: 14 14 0 0;");
-            imgArea.getChildren().add(0, iv);
+            imgArea.getChildren().add(iv);
             Task<Image> task = new Task<>() {
                 @Override protected Image call() { return new Image(r.getImagine(), true); }
             };
@@ -225,7 +224,6 @@ public class MainController implements Initializable {
                 Image img = task.getValue();
                 if (!img.isError()) {
                     iv.setImage(img);
-                    emojiPh.setVisible(false);
                 }
             });
             Thread t = new Thread(task); t.setDaemon(true); t.start();
@@ -241,9 +239,9 @@ public class MainController implements Initializable {
 
         HBox meta = new HBox(6);
         meta.setAlignment(Pos.CENTER_LEFT);
-        Label cat = new Label(getCategoryEmoji(r.getCategorie()) + " " + r.getCategorie());
+        Label cat = new Label(r.getCategorie());
         cat.setStyle("-fx-font-size: 11px; -fx-text-fill: #6B7280;");
-        Label timp = new Label("⏱ " + r.getTimpPreparare());
+        Label timp = new Label(r.getTimpPreparare());
         timp.setStyle("-fx-font-size: 11px; -fx-text-fill: #6B7280;");
         meta.getChildren().addAll(cat, timp);
 
@@ -278,7 +276,7 @@ public class MainController implements Initializable {
 
                 Region indicator = new Region();
                 indicator.setPrefWidth(4); indicator.setMinWidth(4);
-                indicator.setStyle(selected ? "-fx-background-color: white;" : "-fx-background-color: transparent;");
+                indicator.setStyle(selected ? "-fx-background-color: #1B4332;" : "-fx-background-color: transparent;");
 
                 VBox content = new VBox(3);
                 content.setPadding(new Insets(10, 14, 10, 10));
@@ -286,13 +284,13 @@ public class MainController implements Initializable {
 
                 Label numeLabel = new Label(item.getNume());
                 numeLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 13px; -fx-text-fill: "
-                        + (selected ? "white;" : "rgba(255,255,255,0.9);"));
+                        + (selected ? "#1B4332;" : "rgba(27,67,50,0.9);"));
 
                 HBox meta = new HBox(8); meta.setAlignment(Pos.CENTER_LEFT);
-                Label catLabel = new Label(getCategoryEmoji(item.getCategorie()) + " " + item.getCategorie());
-                catLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.6);");
-                Label timpLabel = new Label("⏱ " + item.getTimpPreparare());
-                timpLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.6);");
+                Label catLabel = new Label(item.getCategorie());
+                catLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: rgba(27,67,50,0.65);");
+                Label timpLabel = new Label(item.getTimpPreparare());
+                timpLabel.setStyle("-fx-font-size: 11px; -fx-text-fill: rgba(27,67,50,0.65);");
                 meta.getChildren().addAll(catLabel, timpLabel);
 
                 content.getChildren().addAll(numeLabel, meta);
@@ -386,16 +384,22 @@ public class MainController implements Initializable {
 
     private void construiesteCartiIngrediente(List<Ingredient> ingrediente) {
         panelIngrediente.getChildren().clear();
+        IngredientIconService iconService = IngredientIconService.getInstance();
         for (Ingredient ing : ingrediente) {
             VBox card = new VBox(6);
             card.setPrefWidth(110); card.setAlignment(Pos.CENTER); card.setPadding(new Insets(12));
             card.getStyleClass().add("ingredient-card");
 
             StackPane imgPh = new StackPane(); imgPh.setPrefSize(70, 70);
-            imgPh.setStyle("-fx-background-color: #F0EDE8; -fx-background-radius: 50%;");
-            Label emoji = new Label(getEmojiForIngredient(ing.getNume()));
-            emoji.setStyle("-fx-font-size: 28px;");
-            imgPh.getChildren().add(emoji);
+            imgPh.setStyle("-fx-background-color: #f3f3eb; -fx-background-radius: 50%;");
+
+            Image iconImage = iconService.getIcon(ing.getNume());
+            if (iconImage != null) {
+                ImageView iv = new ImageView(iconImage);
+                iv.setFitWidth(INGREDIENT_ICON_SIZE); iv.setFitHeight(INGREDIENT_ICON_SIZE);
+                iv.setPreserveRatio(true); iv.setSmooth(true);
+                imgPh.getChildren().add(iv);
+            }
 
             Label lblNume = new Label(ing.getNume());
             lblNume.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #1A1A1A; -fx-text-alignment: center; -fx-wrap-text: true; -fx-max-width: 95px;");
@@ -750,40 +754,5 @@ public class MainController implements Initializable {
 
     private Label boldLabel(String text) {
         Label l = new Label(text); l.setStyle("-fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #9A8F85;"); return l;
-    }
-
-    private String getEmojiForIngredient(String name) {
-        if (name == null) return "🌿";
-        String n = name.toLowerCase();
-        if (n.contains("rosie") || n.contains("tomat")) return "🍅";
-        if (n.contains("morcov")) return "🥕";
-        if (n.contains("ceapa")) return "🧅";
-        if (n.contains("usturoi")) return "🧄";
-        if (n.contains("lamaie")) return "🍋";
-        if (n.contains("ou")) return "🥚";
-        if (n.contains("pui") || n.contains("carne")) return "🍗";
-        if (n.contains("paste") || n.contains("spaghetti")) return "🍝";
-        if (n.contains("branza") || n.contains("parmezan")) return "🧀";
-        if (n.contains("lapte") || n.contains("smantana")) return "🥛";
-        if (n.contains("ulei")) return "🫙";
-        if (n.contains("sare") || n.contains("piper")) return "🧂";
-        if (n.contains("faina")) return "🌾";
-        if (n.contains("mar")) return "🍎";
-        return "🌿";
-    }
-
-    private String getCategoryEmoji(String categorie) {
-        if (categorie == null) return "🍽";
-        String c = categorie.toLowerCase();
-        if (c.contains("paste") || c.contains("spaghett")) return "🍝";
-        if (c.contains("supa") || c.contains("ciorba")) return "🍲";
-        if (c.contains("salata")) return "\uD83E\uDD57"; // 🥗
-        if (c.contains("desert") || c.contains("prajitura")) return "🍰";
-        if (c.contains("carne") || c.contains("grill")) return "🥩";
-        if (c.contains("peste") || c.contains("fructe de mare")) return "🐟";
-        if (c.contains("pizza")) return "🍕";
-        if (c.contains("sandvi") || c.contains("burger")) return "🥪";
-        if (c.contains("mic dejun") || c.contains("omleta")) return "🍳";
-        return "🍽";
     }
 }

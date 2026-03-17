@@ -15,7 +15,7 @@
         <HBox fx:id="titleBar" styleClass="title-bar" prefHeight="44" alignment="CENTER_RIGHT" spacing="8"
               style="-fx-background-color: transparent; -fx-padding: 0 16 0 20;">
             <HBox HBox.hgrow="ALWAYS" alignment="CENTER_LEFT">
-                <Label text="&#127807; RecipeBook" styleClass="sidebar-logo"
+                <Label text="RecipeBook" styleClass="sidebar-logo"
                        style="-fx-font-size: 16px; -fx-text-fill: #2D6A4F;"/>
             </HBox>
             <Button fx:id="btnMinimize" styleClass="btn-minimize" text=""/>
@@ -29,14 +29,14 @@
             <VBox fx:id="navSidebar" styleClass="nav-sidebar" prefWidth="210" spacing="4">
                 <padding><Insets top="20" right="12" bottom="20" left="12"/></padding>
 
-                <Label text="&#127807; RecipeBook" styleClass="sidebar-logo"/>
-                <Label text="Planificator de Retete" style="-fx-font-size: 10px; -fx-text-fill: rgba(255,255,255,0.6); -fx-padding: 2 0 24 0;"/>
+                <Label text="RecipeBook" styleClass="sidebar-logo"/>
+                <Label text="Planificator de Retete" style="-fx-font-size: 10px; -fx-text-fill: rgba(27,67,50,0.65); -fx-padding: 2 0 24 0;"/>
 
-                <Button fx:id="btnNavDashboard" text="&#127968;  Dashboard" styleClass="nav-btn,nav-btn-active"
+                <Button fx:id="btnNavDashboard" text="Dashboard" styleClass="nav-btn,nav-btn-active"
                         maxWidth="Infinity" onAction="#onNavDashboard"/>
-                <Button fx:id="btnNavRecipes" text="&#128203;  Retete" styleClass="nav-btn"
+                <Button fx:id="btnNavRecipes" text="Retete" styleClass="nav-btn"
                         maxWidth="Infinity" onAction="#onNavRecipes"/>
-                <Button fx:id="btnNavShopping" text="&#128722;  Lista Cumparaturi" styleClass="nav-btn"
+                <Button fx:id="btnNavShopping" text="Lista Cumparaturi" styleClass="nav-btn"
                         maxWidth="Infinity" onAction="#onNavShopping"/>
 
                 <Region VBox.vgrow="ALWAYS"/>
@@ -56,10 +56,10 @@
                     <HBox alignment="CENTER_LEFT" spacing="12"
                           style="-fx-padding: 20 24 12 24; -fx-background-color: rgba(255,255,255,0.6); -fx-border-color: rgba(0,0,0,0.05); -fx-border-width: 0 0 1 0;">
                         <VBox spacing="2" HBox.hgrow="ALWAYS">
-                            <Label text="Bine ai venit! &#127807;" styleClass="page-title"/>
+                            <Label text="Bine ai venit!" styleClass="page-title"/>
                             <Label text="Alege o reteta si incepe sa gatesti" style="-fx-font-size: 13px; -fx-text-fill: #6B7280;"/>
                         </VBox>
-                        <TextField fx:id="dashSearch" promptText="&#128269; Cauta retete..."
+                        <TextField fx:id="dashSearch" promptText="Cauta retete..."
                                    styleClass="dash-search" prefWidth="220" onKeyReleased="#onDashSearch"/>
                     </HBox>
 
@@ -77,12 +77,12 @@
                     <VBox fx:id="sidebar" styleClass="sidebar" prefWidth="270" spacing="0">
                         <padding><Insets top="20" right="16" bottom="20" left="16"/></padding>
 
-                        <Label text="&#128203; Retete" styleClass="sidebar-logo"/>
+                        <Label text="Retete" styleClass="sidebar-logo"/>
                         <Label text="Colectia ta de retete"
-                               style="-fx-font-size: 11px; -fx-text-fill: rgba(255,255,255,0.6); -fx-padding: 2 0 20 0;"/>
+                               style="-fx-font-size: 11px; -fx-text-fill: rgba(27,67,50,0.65); -fx-padding: 2 0 20 0;"/>
 
                         <TextField fx:id="campCautare" styleClass="sidebar-search"
-                                   promptText="&#128269;  Cauta retete..." maxWidth="Infinity">
+                                   promptText="Cauta retete..." maxWidth="Infinity">
                             <VBox.margin><Insets bottom="8"/></VBox.margin>
                         </TextField>
 
@@ -140,7 +140,6 @@
                                 <HBox spacing="16">
                                     <VBox fx:id="ingredienteCard" styleClass="glass-card" HBox.hgrow="ALWAYS" spacing="12">
                                         <HBox alignment="CENTER_LEFT" spacing="8">
-                                            <Label text="&#129388;" style="-fx-font-size: 18px;"/>
                                             <Label text="Ingrediente" styleClass="section-title"/>
                                         </HBox>
                                         <ScrollPane fitToWidth="true" prefHeight="220"
@@ -152,7 +151,6 @@
 
                                     <VBox fx:id="instructiuniCard" styleClass="glass-card" prefWidth="280" spacing="12">
                                         <HBox alignment="CENTER_LEFT" spacing="8">
-                                            <Label text="&#128203;" style="-fx-font-size: 18px;"/>
                                             <Label text="Instructiuni" styleClass="section-title"/>
                                         </HBox>
                                         <TextArea fx:id="areaInstructiuni" styleClass="instructions-area"
@@ -162,7 +160,7 @@
                                 </HBox>
 
                                 <HBox alignment="CENTER_LEFT">
-                                    <Button fx:id="btnAdaugaInLista" text="&#10133;  Adauga la Lista de Cumparaturi"
+                                    <Button fx:id="btnAdaugaInLista" text="Adauga la Lista de Cumparaturi"
                                             styleClass="btn-primary" onAction="#adaugaInListaCumparaturi"/>
                                 </HBox>
 
@@ -170,7 +168,6 @@
                         </ScrollPane>
 
                         <VBox fx:id="emptyState" alignment="CENTER" spacing="16" style="-fx-padding: 40;">
-                            <Label text="&#127807;" styleClass="empty-icon"/>
                             <Label text="Selecteaza o reteta" styleClass="empty-title"/>
                             <Label text="Alege o reteta din lista din stanga pentru a vedea detaliile"
                                    styleClass="empty-subtitle" wrapText="true" textAlignment="CENTER"/>
@@ -185,7 +182,7 @@
                     <!-- Date bar -->
                     <HBox fx:id="dateBar" styleClass="date-bar" alignment="CENTER_LEFT" spacing="10"
                           style="-fx-padding: 12 20 12 20;">
-                        <Label text="&#128197; Filtrare:" style="-fx-font-weight: bold; -fx-text-fill: #2D6A4F; -fx-font-size: 13px;"/>
+                        <Label text="Filtrare:" style="-fx-font-weight: bold; -fx-text-fill: #2D6A4F; -fx-font-size: 13px;"/>
                         <DatePicker fx:id="dateStart" promptText="Data inceput" prefWidth="150"/>
                         <Label text="&#8212;" style="-fx-text-fill: #6B7280;"/>
                         <DatePicker fx:id="dateEnd" promptText="Data sfarsit" prefWidth="150"/>
@@ -206,7 +203,7 @@
 
                             <HBox alignment="CENTER_LEFT" spacing="8"
                                   style="-fx-padding: 14 20 6 20; -fx-background-color: rgba(255,255,255,0.5);">
-                                <Label text="&#128722; Lista de Cumparaturi" styleClass="panel-title"/>
+                                <Label text="Lista de Cumparaturi" styleClass="panel-title"/>
                                 <Region HBox.hgrow="ALWAYS"/>
                                 <Label fx:id="labelTotal" style="-fx-font-size: 12px; -fx-text-fill: #6B7280;"/>
                             </HBox>
@@ -228,7 +225,7 @@
                                                HBox.hgrow="ALWAYS" styleClass="form-field"/>
                                     <TextField fx:id="campPret" promptText="Pret"
                                                prefWidth="76" styleClass="form-field"/>
-                                    <Button text="&#10010; Adauga" styleClass="btn-primary"
+                                    <Button text="Adauga" styleClass="btn-primary"
                                             onAction="#onAdaugaItemManual"/>
                                 </HBox>
                             </VBox>
@@ -264,7 +261,7 @@
 
                             <HBox alignment="CENTER_LEFT" spacing="8"
                                   style="-fx-padding: 14 20 6 20; -fx-background-color: rgba(255,255,255,0.5);">
-                                <Label text="&#128220; Istoric Cumparaturi" styleClass="panel-title"/>
+                                <Label text="Istoric Cumparaturi" styleClass="panel-title"/>
                                 <Region HBox.hgrow="ALWAYS"/>
                                 <Label fx:id="labelHistoryCount"
                                        style="-fx-font-size: 12px; -fx-text-fill: #6B7280;"/>
